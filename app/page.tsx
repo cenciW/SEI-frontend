@@ -10,6 +10,8 @@ import { Progress } from "@/components/ui/progress";
 import { Switch } from "@/components/ui/switch";
 import CropVisualization from "@/components/CropVisualization";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
 export default function Home() {
   const [location, setLocation] = useState("field1");
   const [crop, setCrop] = useState("corn");
@@ -31,7 +33,7 @@ export default function Home() {
 
   const updateSensor = async (type: string, value: number) => {
     try {
-      await fetch("http://localhost:3001/agents/sensor", {
+      await fetch(`${API_URL}/agents/sensor`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ location, type, value }),
@@ -43,7 +45,7 @@ export default function Home() {
 
   const updateContext = async () => {
     try {
-      await fetch("http://localhost:3001/agents/context", {
+      await fetch(`${API_URL}/agents/context`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
@@ -59,7 +61,7 @@ export default function Home() {
 
   const updateStage = async () => {
     try {
-      await fetch("http://localhost:3001/agents/stage", {
+      await fetch(`${API_URL}/agents/stage`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
@@ -75,7 +77,7 @@ export default function Home() {
 
   const updateAdvanced = async () => {
     try {
-      await fetch("http://localhost:3001/agents/advanced", {
+      await fetch(`${API_URL}/agents/advanced`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
@@ -125,8 +127,8 @@ export default function Home() {
 
       // Call both APIs in parallel
       const [prologRes, aiRes] = await Promise.all([
-        fetch(`http://localhost:3001/agents/recommendation?crop=${crop}&location=${location}`),
-        fetch(`http://localhost:3001/agents/ai-recommendation?${aiParams.toString()}`)
+        fetch(`${API_URL}/agents/recommendation?crop=${crop}&location=${location}`),
+        fetch(`${API_URL}/agents/ai-recommendation?${aiParams.toString()}`)
       ]);
       
       // Check Prolog response
