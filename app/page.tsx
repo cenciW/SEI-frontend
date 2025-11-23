@@ -384,7 +384,7 @@ export default function Home() {
 
               {(crop === "corn" || crop === "wheat") && (
                 <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
-                  <Label className="text-slate-300">Sistema de Irrigação</Label>
+                  <Label className="text-slate-300">Sistema Especialista de Irrigação</Label>
                   <Select
                     value={system}
                     onValueChange={(value) => setSystem(value as SystemType)}

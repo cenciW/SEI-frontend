@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { API_URL } from '@/lib/constants';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -71,7 +72,7 @@ export default function LoginPage() {
     setError('');
     setLoading(true);
 
-    const endpoint = isRegister ? 'http://localhost:3001/auth/register' : 'http://localhost:3001/auth/login';
+    const endpoint = isRegister ? `${API_URL}/auth/register` : `${API_URL}/auth/login`;
     const body = isRegister ? { email, password, name } : { email, password };
 
     try {
@@ -117,7 +118,7 @@ export default function LoginPage() {
         {/* Heurística 4: Consistency and Standards - Título matching o sistema principal */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent mb-2">
-            Sistema de Irrigação
+            Sistema Especialista de Irrigação
           </h1>
           <p className="text-slate-400">
             {isRegister ? 'Criar nova conta' : 'Acesse sua conta'}

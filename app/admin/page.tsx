@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { API_URL } from '@/lib/constants';
 
 export default function AdminPage() {
   const { user, token, isLoading } = useAuth();
@@ -34,7 +35,7 @@ export default function AdminPage() {
 
   const fetchModules = async () => {
     try {
-      const res = await fetch('http://localhost:3001/agents/prolog/modules', {
+      const res = await fetch(`${API_URL}/agents/prolog/modules`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
@@ -50,7 +51,7 @@ export default function AdminPage() {
     setLoading(true);
     setStatus('Carregando módulo...');
     try {
-      const res = await fetch(`http://localhost:3001/agents/prolog/modules/${modulePath}`, {
+      const res = await fetch(`${API_URL}/agents/prolog/modules/${modulePath}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
@@ -71,7 +72,7 @@ export default function AdminPage() {
     setStatus('Salvando e validando...');
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:3001/agents/prolog/modules/${selectedModule}`, {
+      const res = await fetch(`${API_URL}/agents/prolog/modules/${selectedModule}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
