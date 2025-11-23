@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -20,352 +19,75 @@ import {
 } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
 import CropVisualization from "@/components/CropVisualization";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
-
-// Types for recommendations
-interface PrologRecommendation {
-  Need: "yes" | "no" | "maybe";
-  Score: number;
-  VolumeL: number | string;
-  Advice?: string;
-}
-
-interface AIRecommendation {
-  shouldIrrigate: string;
-  volumeL: number | string;
-  advice?: string;
-  cached?: boolean;
-}
-
-// Heurística 9: Ajudar usuários a reconhecer, diagnosticar e recuperar de erros
-const showError = (message: string) => {
-  return message;
-};
-
-// Heurística 5: Prevenção de erros
-const validateInputs = (
-  moisture: string,
-  rain: string,
-  temp: string,
-  humidity: string,
-  potSize: string,
-  isPot: boolean
-): string | null => {
-  const moistureNum = parseFloat(moisture);
-  const rainNum = parseFloat(rain);
-  const tempNum = parseFloat(temp);
-  const humidityNum = parseFloat(humidity);
-
-  if (isNaN(moistureNum) || moistureNum < 0 || moistureNum > 100) {
-    return "Umidade do solo deve estar entre 0% e 100%";
-  }
-  if (isNaN(rainNum) || rainNum < 0) {
-    return "Chuva não pode ser negativa";
-  }
-  if (isNaN(tempNum) || tempNum < -50 || tempNum > 60) {
-    return "Temperatura deve estar entre -50°C e 60°C";
-  }
-  if (isNaN(humidityNum) || humidityNum < 0 || humidityNum > 100) {
-    return "Umidade do ar deve estar entre 0% e 100%";
-  }
-  if (isPot) {
-    const potSizeNum = parseFloat(potSize);
-    if (isNaN(potSizeNum) || potSizeNum <= 0) {
-      return "Tamanho do vaso deve ser maior que zero";
-    }
-  }
-  return null;
-};
+import {
+  ApiStatusIndicator,
+  Notification,
+  VolumeVisualization,
+  VolumeDisplay,
+} from "@/components/IrrigationUI";
+import { useIrrigationSystem } from "@/hooks/useIrrigationSystem";
+import { CropType, StageType, SystemType, GoalType } from "@/lib/types";
 
 export default function Home() {
-  const [location, setLocation] = useState("field1");
-  const [crop, setCrop] = useState("corn");
-  const [moisture, setMoisture] = useState("50");
-  const [rain, setRain] = useState("0");
-  const [temp, setTemp] = useState("25");
-  const [humidity, setHumidity] = useState("60");
-  const [isPot, setIsPot] = useState(false);
-  const [potSize, setPotSize] = useState("10");
-  const [stage, setStage] = useState("vegetative");
-  const [week, setWeek] = useState("1");
-  const [ec, setEc] = useState("1.5");
-  const [system, setSystem] = useState("drip");
-  const [goal, setGoal] = useState("balanced");
-  const [recommendation, setRecommendation] =
-    useState<PrologRecommendation | null>(null);
-  const [aiRecommendation, setAiRecommendation] =
-    useState<AIRecommendation | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [aiLoading, setAiLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [apiStatus, setApiStatus] = useState<
-    "checking" | "online" | "offline" | null
-  >(null);
-
-  const updateSensor = async (type: string, value: number) => {
-    try {
-      await fetch(`${API_URL}/agents/sensor`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ location, type, value }),
-      });
-    } catch (error) {
-      console.error("Failed to update sensor", error);
-    }
-  };
-
-  const updateContext = async () => {
-    try {
-      await fetch(`${API_URL}/agents/context`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          location,
-          mode: isPot ? "pot" : "field",
-          size: isPot ? parseFloat(potSize) : 0,
-        }),
-      });
-    } catch (error) {
-      console.error("Failed to update context", error);
-    }
-  };
-
-  const updateStage = async () => {
-    try {
-      await fetch(`${API_URL}/agents/stage`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          location,
-          stage,
-          week: parseInt(week),
-        }),
-      });
-    } catch (error) {
-      console.error("Failed to update stage", error);
-    }
-  };
-
-  const updateAdvanced = async () => {
-    try {
-      await fetch(`${API_URL}/agents/advanced`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          location,
-          ec: parseFloat(ec),
-          system,
-          goal,
-        }),
-      });
-    } catch (error) {
-      console.error("Failed to update advanced params", error);
-    }
-  };
-
-  const handleAnalyze = async () => {
-    // Heurística 5: Prevenção de erros - validar antes de enviar
-    const validationError = validateInputs(
-      moisture,
-      rain,
-      temp,
-      humidity,
-      potSize,
-      isPot
-    );
-    if (validationError) {
-      setError(validationError);
-      setTimeout(() => setError(null), 5000);
-      return;
-    }
-
-    setError(null);
-    setSuccessMessage(null);
-    setLoading(true);
-    setAiLoading(true);
-
-    try {
-      // Heurística 1: Visibilidade do status do sistema
-      setApiStatus("checking");
-
-      // Update context first
-      await updateContext();
-      await updateStage();
-      await updateAdvanced();
-
-      // Update sensors with current values
-      await updateSensor("soil_moisture_pct", parseFloat(moisture));
-      await updateSensor("rain_last_24h_mm", parseFloat(rain));
-      await updateSensor("air_temperature_c", parseFloat(temp));
-      await updateSensor("relative_humidity_pct", parseFloat(humidity));
-
-      // Build query params for AI
-      const aiParams = new URLSearchParams({
-        crop,
-        location,
-        moisture,
-        temp,
-        humidity,
-        rain,
-        stage,
-        week,
-        isPot: isPot.toString(),
-      });
-
-      if (isPot) aiParams.append("potSize", potSize);
-      if (ec) aiParams.append("ec", ec);
-      if (system) aiParams.append("system", system);
-      if (goal) aiParams.append("goal", goal);
-
-      // Call both APIs in parallel
-      const [prologRes, aiRes] = await Promise.all([
-        fetch(
-          `${API_URL}/agents/recommendation?crop=${crop}&location=${location}`
-        ),
-        fetch(`${API_URL}/agents/ai-recommendation?${aiParams.toString()}`),
-      ]);
-
-      // Check Prolog response
-      if (!prologRes.ok) {
-        throw new Error(`Prolog HTTP error! status: ${prologRes.status}`);
-      }
-      const contentType = prologRes.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        throw new Error("Resposta do Prolog não é JSON.");
-      }
-      const prologData = await prologRes.json();
-      setRecommendation(prologData);
-      setLoading(false);
-
-      // Check AI response
-      if (!aiRes.ok) {
-        throw new Error(`AI HTTP error! status: ${aiRes.status}`);
-      }
-      const aiData = await aiRes.json();
-      setAiRecommendation(aiData);
-      setAiLoading(false);
-
-      // Heurística 1: Feedback de sucesso
-      setApiStatus("online");
-      setSuccessMessage("✓ Análise concluída com sucesso!");
-      setTimeout(() => setSuccessMessage(null), 5000);
-    } catch (error) {
-      console.error("Failed to get recommendations", error);
-      // Heurística 9: Mensagens de erro claras e acionáveis
-      setApiStatus("offline");
-      const errorMessage =
-        error instanceof Error ? error.message : "Erro desconhecido";
-      setError(
-        `Erro ao obter recomendações: ${errorMessage}. Por favor, verifique sua conexão e tente novamente.`
-      );
-      setTimeout(() => setError(null), 8000);
-      setLoading(false);
-      setAiLoading(false);
-    }
-  };
+  const {
+    // State
+    location,
+    crop,
+    moisture,
+    rain,
+    temp,
+    humidity,
+    isPot,
+    potSize,
+    stage,
+    week,
+    ec,
+    system,
+    goal,
+    recommendation,
+    aiRecommendation,
+    loading,
+    aiLoading,
+    error,
+    successMessage,
+    apiStatus,
+    // Setters
+    setLocation,
+    setCrop,
+    setMoisture,
+    setRain,
+    setTemp,
+    setHumidity,
+    setIsPot,
+    setPotSize,
+    setStage,
+    setWeek,
+    setEc,
+    setSystem,
+    setGoal,
+    setError,
+    // Actions
+    handleAnalyze,
+  } = useIrrigationSystem();
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-50 p-8 font-sans transition-colors duration-300">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Heurística 1: Visibilidade do status do sistema */}
-        {apiStatus && (
-          <div
-            className={`fixed top-4 right-4 z-50 px-4 py-2 rounded-lg border flex items-center gap-2 animate-in slide-in-from-top-5 ${
-              apiStatus === "online"
-                ? "bg-green-900/30 border-green-700 text-green-400"
-                : apiStatus === "offline"
-                ? "bg-red-900/30 border-red-700 text-red-400"
-                : "bg-yellow-900/30 border-yellow-700 text-yellow-400"
-            }`}
-          >
-            <div
-              className={`w-2 h-2 rounded-full ${
-                apiStatus === "online"
-                  ? "bg-green-500 animate-pulse"
-                  : apiStatus === "offline"
-                  ? "bg-red-500"
-                  : "bg-yellow-500 animate-pulse"
-              }`}
-            />
-            <span className="text-sm font-medium">
-              {apiStatus === "online"
-                ? "API Online"
-                : apiStatus === "offline"
-                ? "API Offline"
-                : "Verificando API..."}
-            </span>
-          </div>
-        )}
+        <ApiStatusIndicator apiStatus={apiStatus} />
 
         {/* Heurística 1: Feedback de sucesso */}
-        {successMessage && (
-          <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 bg-green-900/90 border border-green-700 text-green-100 px-6 py-3 rounded-lg shadow-lg animate-in slide-in-from-top-5 backdrop-blur-sm">
-            <div className="flex items-center gap-2">
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
-              <span className="font-medium">{successMessage}</span>
-            </div>
-          </div>
-        )}
+        <Notification message={successMessage} type="success" />
 
         {/* Heurística 9: Mensagens de erro claras */}
-        {error && (
-          <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 bg-red-900/90 border border-red-700 text-red-100 px-6 py-4 rounded-lg shadow-lg animate-in slide-in-from-top-5 backdrop-blur-sm max-w-md">
-            <div className="flex items-start gap-3">
-              <svg
-                className="w-6 h-6 flex-shrink-0 mt-0.5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              <div className="flex-1">
-                <p className="font-semibold mb-1">Erro</p>
-                <p className="text-sm">{error}</p>
-              </div>
-              <button
-                onClick={() => setError(null)}
-                className="flex-shrink-0 hover:bg-red-800/50 rounded p-1 transition-colors"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            </div>
-          </div>
-        )}
+        <Notification
+          message={error}
+          type="error"
+          onClose={() => setError(null)}
+        />
 
         <div className="text-center space-y-2">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold bg-linear-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
             Sistema Especialista de Irrigação
           </h1>
           <p className="text-slate-400">Comparação: Prolog vs IA Generativa</p>
@@ -469,7 +191,10 @@ export default function Home() {
                       </div>
                     </div>
                   </div>
-                  <Select value={crop} onValueChange={setCrop}>
+                  <Select
+                    value={crop}
+                    onValueChange={(value) => setCrop(value as CropType)}
+                  >
                     <SelectTrigger className="bg-slate-950 border-slate-800 text-slate-200">
                       <SelectValue />
                     </SelectTrigger>
@@ -521,7 +246,10 @@ export default function Home() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label className="text-slate-300">Estágio</Label>
-                  <Select value={stage} onValueChange={setStage}>
+                  <Select
+                    value={stage}
+                    onValueChange={(value) => setStage(value as StageType)}
+                  >
                     <SelectTrigger className="bg-slate-950 border-slate-800 text-slate-200">
                       <SelectValue />
                     </SelectTrigger>
@@ -574,7 +302,10 @@ export default function Home() {
                     <Label className="text-slate-300">
                       Meta de Crescimento
                     </Label>
-                    <Select value={goal} onValueChange={setGoal}>
+                    <Select
+                      value={goal}
+                      onValueChange={(value) => setGoal(value as GoalType)}
+                    >
                       <SelectTrigger className="bg-slate-950 border-slate-800 text-slate-200">
                         <SelectValue />
                       </SelectTrigger>
@@ -601,7 +332,10 @@ export default function Home() {
               {(crop === "corn" || crop === "wheat") && (
                 <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
                   <Label className="text-slate-300">Sistema de Irrigação</Label>
-                  <Select value={system} onValueChange={setSystem}>
+                  <Select
+                    value={system}
+                    onValueChange={(value) => setSystem(value as SystemType)}
+                  >
                     <SelectTrigger className="bg-slate-950 border-slate-800 text-slate-200">
                       <SelectValue />
                     </SelectTrigger>
@@ -694,7 +428,7 @@ export default function Home() {
               <div className="bg-blue-900/20 border border-blue-800/50 rounded-lg p-3 text-sm text-blue-300">
                 <div className="flex items-start gap-2">
                   <svg
-                    className="w-5 h-5 flex-shrink-0 mt-0.5"
+                    className="w-5 h-5 shrink-0 mt-0.5"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -749,38 +483,12 @@ export default function Home() {
                       </div>
                     </div>
 
-                    {/* VISUALIZATION: IRRIGATION VOLUME */}
-                    <div className="relative group">
-                      <div className="w-24 h-32 bg-slate-800 border-2 border-slate-700 rounded-lg overflow-hidden relative shadow-inner">
-                        {/* Measurement Lines */}
-                        <div className="absolute inset-0 flex flex-col justify-between p-1 opacity-30 z-10 pointer-events-none">
-                          <div className="w-full border-b border-slate-500"></div>
-                          <div className="w-full border-b border-slate-500"></div>
-                          <div className="w-full border-b border-slate-500"></div>
-                          <div className="w-full border-b border-slate-500"></div>
-                        </div>
-
-                        {/* Water Fill */}
-                        <div
-                          className="absolute bottom-0 left-0 right-0 bg-cyan-500/80 transition-all duration-1000 ease-out"
-                          style={{
-                            height: `${Math.min(
-                              100,
-                              ((typeof recommendation.VolumeL === "number"
-                                ? recommendation.VolumeL
-                                : 0) /
-                                (isPot ? parseFloat(potSize) : 10)) *
-                                100
-                            )}%`,
-                          }}
-                        >
-                          <div className="absolute top-0 left-0 right-0 h-1 bg-cyan-300 opacity-50 animate-pulse"></div>
-                        </div>
-                      </div>
-                      <div className="text-center text-xs text-slate-500 mt-2">
-                        Volume
-                      </div>
-                    </div>
+                    <VolumeVisualization
+                      volumeL={recommendation.VolumeL}
+                      isPot={isPot}
+                      potSize={potSize}
+                      color="cyan"
+                    />
                   </div>
 
                   <div className="space-y-2">
@@ -808,28 +516,10 @@ export default function Home() {
                   <div className="space-y-2">
                     <Label className="text-slate-300">Volume Sugerido</Label>
                     <div className="text-3xl font-mono bg-slate-950 border border-slate-800 p-4 rounded-lg text-cyan-400 text-center shadow-inner">
-                      {(() => {
-                        if (typeof recommendation.VolumeL !== "number")
-                          return recommendation.VolumeL;
-                        if (recommendation.VolumeL < 1) {
-                          return (
-                            <>
-                              {Math.round(recommendation.VolumeL * 1000)}{" "}
-                              <span className="text-lg text-slate-500">
-                                {isPot ? "mL" : "mL/m²"}
-                              </span>
-                            </>
-                          );
-                        }
-                        return (
-                          <>
-                            {parseFloat(recommendation.VolumeL.toFixed(3))}{" "}
-                            <span className="text-lg text-slate-500">
-                              {isPot ? "Litros" : "L/m²"}
-                            </span>
-                          </>
-                        );
-                      })()}
+                      <VolumeDisplay
+                        volumeL={recommendation.VolumeL}
+                        isPot={isPot}
+                      />
                     </div>
                   </div>
 
@@ -907,65 +597,21 @@ export default function Home() {
                       </div>
                     </div>
 
-                    {/* VISUALIZATION: IRRIGATION VOLUME */}
-                    <div className="relative group">
-                      <div className="w-24 h-32 bg-slate-800 border-2 border-slate-700 rounded-lg overflow-hidden relative shadow-inner">
-                        {/* Measurement Lines */}
-                        <div className="absolute inset-0 flex flex-col justify-between p-1 opacity-30 z-10 pointer-events-none">
-                          <div className="w-full border-b border-slate-500"></div>
-                          <div className="w-full border-b border-slate-500"></div>
-                          <div className="w-full border-b border-slate-500"></div>
-                          <div className="w-full border-b border-slate-500"></div>
-                        </div>
-
-                        {/* Water Fill */}
-                        <div
-                          className="absolute bottom-0 left-0 right-0 bg-purple-500/80 transition-all duration-1000 ease-out"
-                          style={{
-                            height: `${Math.min(
-                              100,
-                              ((typeof aiRecommendation.volumeL === "number"
-                                ? aiRecommendation.volumeL
-                                : 0) /
-                                (isPot ? parseFloat(potSize) : 10)) *
-                                100
-                            )}%`,
-                          }}
-                        >
-                          <div className="absolute top-0 left-0 right-0 h-1 bg-purple-300 opacity-50 animate-pulse"></div>
-                        </div>
-                      </div>
-                      <div className="text-center text-xs text-slate-500 mt-2">
-                        Volume
-                      </div>
-                    </div>
+                    <VolumeVisualization
+                      volumeL={aiRecommendation.volumeL}
+                      isPot={isPot}
+                      potSize={potSize}
+                      color="purple"
+                    />
                   </div>
 
                   <div className="space-y-2">
                     <Label className="text-slate-300">Volume Sugerido</Label>
                     <div className="text-3xl font-mono bg-slate-950 border border-slate-800 p-4 rounded-lg text-purple-400 text-center shadow-inner">
-                      {(() => {
-                        if (typeof aiRecommendation.volumeL !== "number")
-                          return aiRecommendation.volumeL;
-                        if (aiRecommendation.volumeL < 1) {
-                          return (
-                            <>
-                              {Math.round(aiRecommendation.volumeL * 1000)}{" "}
-                              <span className="text-lg text-slate-500">
-                                {isPot ? "mL" : "mL/m²"}
-                              </span>
-                            </>
-                          );
-                        }
-                        return (
-                          <>
-                            {parseFloat(aiRecommendation.volumeL.toFixed(3))}{" "}
-                            <span className="text-lg text-slate-500">
-                              {isPot ? "Litros" : "L/m²"}
-                            </span>
-                          </>
-                        );
-                      })()}
+                      <VolumeDisplay
+                        volumeL={aiRecommendation.volumeL}
+                        isPot={isPot}
+                      />
                     </div>
                   </div>
 
