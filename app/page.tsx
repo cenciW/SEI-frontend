@@ -19,10 +19,24 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
-import { Switch } from "@/components/ui/switch";
 import CropVisualization from "@/components/CropVisualization";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+
+// Types for recommendations
+interface PrologRecommendation {
+  Need: "yes" | "no" | "maybe";
+  Score: number;
+  VolumeL: number | string;
+  Advice?: string;
+}
+
+interface AIRecommendation {
+  shouldIrrigate: string;
+  volumeL: number | string;
+  advice?: string;
+  cached?: boolean;
+}
 
 // Heurística 9: Ajudar usuários a reconhecer, diagnosticar e recuperar de erros
 const showError = (message: string) => {
@@ -78,13 +92,17 @@ export default function Home() {
   const [ec, setEc] = useState("1.5");
   const [system, setSystem] = useState("drip");
   const [goal, setGoal] = useState("balanced");
-  const [recommendation, setRecommendation] = useState<any>(null);
-  const [aiRecommendation, setAiRecommendation] = useState<any>(null);
+  const [recommendation, setRecommendation] =
+    useState<PrologRecommendation | null>(null);
+  const [aiRecommendation, setAiRecommendation] =
+    useState<AIRecommendation | null>(null);
   const [loading, setLoading] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [apiStatus, setApiStatus] = useState<'checking' | 'online' | 'offline' | null>(null);
+  const [apiStatus, setApiStatus] = useState<
+    "checking" | "online" | "offline" | null
+  >(null);
 
   const updateSensor = async (type: string, value: number) => {
     try {
@@ -149,7 +167,14 @@ export default function Home() {
 
   const handleAnalyze = async () => {
     // Heurística 5: Prevenção de erros - validar antes de enviar
-    const validationError = validateInputs(moisture, rain, temp, humidity, potSize, isPot);
+    const validationError = validateInputs(
+      moisture,
+      rain,
+      temp,
+      humidity,
+      potSize,
+      isPot
+    );
     if (validationError) {
       setError(validationError);
       setTimeout(() => setError(null), 5000);
@@ -160,11 +185,11 @@ export default function Home() {
     setSuccessMessage(null);
     setLoading(true);
     setAiLoading(true);
-    
+
     try {
       // Heurística 1: Visibilidade do status do sistema
-      setApiStatus('checking');
-      
+      setApiStatus("checking");
+
       // Update context first
       await updateContext();
       await updateStage();
@@ -221,17 +246,17 @@ export default function Home() {
       const aiData = await aiRes.json();
       setAiRecommendation(aiData);
       setAiLoading(false);
-      
+
       // Heurística 1: Feedback de sucesso
-      setApiStatus('online');
-      setSuccessMessage('✓ Análise concluída com sucesso!');
+      setApiStatus("online");
+      setSuccessMessage("✓ Análise concluída com sucesso!");
       setTimeout(() => setSuccessMessage(null), 5000);
-      
     } catch (error) {
       console.error("Failed to get recommendations", error);
       // Heurística 9: Mensagens de erro claras e acionáveis
-      setApiStatus('offline');
-      const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
+      setApiStatus("offline");
+      const errorMessage =
+        error instanceof Error ? error.message : "Erro desconhecido";
       setError(
         `Erro ao obter recomendações: ${errorMessage}. Por favor, verifique sua conexão e tente novamente.`
       );
@@ -244,23 +269,32 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-50 p-8 font-sans transition-colors duration-300">
       <div className="max-w-7xl mx-auto space-y-8">
-        
         {/* Heurística 1: Visibilidade do status do sistema */}
         {apiStatus && (
-          <div className={`fixed top-4 right-4 z-50 px-4 py-2 rounded-lg border flex items-center gap-2 animate-in slide-in-from-top-5 ${
-            apiStatus === 'online' ? 'bg-green-900/30 border-green-700 text-green-400' :
-            apiStatus === 'offline' ? 'bg-red-900/30 border-red-700 text-red-400' :
-            'bg-yellow-900/30 border-yellow-700 text-yellow-400'
-          }`}>
-            <div className={`w-2 h-2 rounded-full ${
-              apiStatus === 'online' ? 'bg-green-500 animate-pulse' :
-              apiStatus === 'offline' ? 'bg-red-500' :
-              'bg-yellow-500 animate-pulse'
-            }`} />
+          <div
+            className={`fixed top-4 right-4 z-50 px-4 py-2 rounded-lg border flex items-center gap-2 animate-in slide-in-from-top-5 ${
+              apiStatus === "online"
+                ? "bg-green-900/30 border-green-700 text-green-400"
+                : apiStatus === "offline"
+                ? "bg-red-900/30 border-red-700 text-red-400"
+                : "bg-yellow-900/30 border-yellow-700 text-yellow-400"
+            }`}
+          >
+            <div
+              className={`w-2 h-2 rounded-full ${
+                apiStatus === "online"
+                  ? "bg-green-500 animate-pulse"
+                  : apiStatus === "offline"
+                  ? "bg-red-500"
+                  : "bg-yellow-500 animate-pulse"
+              }`}
+            />
             <span className="text-sm font-medium">
-              {apiStatus === 'online' ? 'API Online' :
-               apiStatus === 'offline' ? 'API Offline' :
-               'Verificando API...'}
+              {apiStatus === "online"
+                ? "API Online"
+                : apiStatus === "offline"
+                ? "API Offline"
+                : "Verificando API..."}
             </span>
           </div>
         )}
@@ -269,8 +303,18 @@ export default function Home() {
         {successMessage && (
           <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 bg-green-900/90 border border-green-700 text-green-100 px-6 py-3 rounded-lg shadow-lg animate-in slide-in-from-top-5 backdrop-blur-sm">
             <div className="flex items-center gap-2">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
+                />
               </svg>
               <span className="font-medium">{successMessage}</span>
             </div>
@@ -281,25 +325,45 @@ export default function Home() {
         {error && (
           <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 bg-red-900/90 border border-red-700 text-red-100 px-6 py-4 rounded-lg shadow-lg animate-in slide-in-from-top-5 backdrop-blur-sm max-w-md">
             <div className="flex items-start gap-3">
-              <svg className="w-6 h-6 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <svg
+                className="w-6 h-6 flex-shrink-0 mt-0.5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
               </svg>
               <div className="flex-1">
                 <p className="font-semibold mb-1">Erro</p>
                 <p className="text-sm">{error}</p>
               </div>
-              <button 
+              <button
                 onClick={() => setError(null)}
                 className="flex-shrink-0 hover:bg-red-800/50 rounded p-1 transition-colors"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
             </div>
           </div>
         )}
-        
+
         <div className="text-center space-y-2">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
             Sistema Especialista de Irrigação
@@ -358,8 +422,18 @@ export default function Home() {
                   <div className="flex items-center gap-2">
                     <Label className="text-slate-300">Localização</Label>
                     <div className="group relative">
-                      <svg className="w-4 h-4 text-slate-500 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      <svg
+                        className="w-4 h-4 text-slate-500 cursor-help"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
                       </svg>
                       <div className="absolute left-0 top-6 hidden group-hover:block bg-slate-800 text-slate-200 text-xs rounded p-2 whitespace-nowrap z-50 border border-slate-700 shadow-lg">
                         Identificador único do campo/área
@@ -377,8 +451,18 @@ export default function Home() {
                   <div className="flex items-center gap-2">
                     <Label className="text-slate-300">Cultura</Label>
                     <div className="group relative">
-                      <svg className="w-4 h-4 text-slate-500 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      <svg
+                        className="w-4 h-4 text-slate-500 cursor-help"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
                       </svg>
                       <div className="absolute left-0 top-6 hidden group-hover:block bg-slate-800 text-slate-200 text-xs rounded p-2 whitespace-nowrap z-50 border border-slate-700 shadow-lg">
                         Tipo de planta cultivada
@@ -590,7 +674,7 @@ export default function Home() {
 
               {/* Heurística 1: Feedback visual durante ação */}
               <Button
-                className="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-slate-700 disabled:cursor-not-allowed text-white font-semibold py-6 text-lg shadow-lg shadow-blue-900/20 transition-all active:scale-[0.98] disabled:active:scale-100"
+                className="cursor-pointer w-full bg-blue-600 hover:bg-blue-500 disabled:bg-slate-700 disabled:cursor-not-allowed text-white font-semibold py-6 text-lg shadow-lg shadow-blue-900/20 transition-all active:scale-[0.98] disabled:active:scale-100"
                 onClick={handleAnalyze}
                 disabled={loading || aiLoading}
               >
@@ -601,22 +685,31 @@ export default function Home() {
                   </div>
                 ) : (
                   <div className="flex items-center justify-center gap-2">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                    </svg>
                     <span>Analisar e Recomendar</span>
                   </div>
                 )}
               </Button>
-              
+
               {/* Heurística 10: Ajuda contextual */}
               <div className="bg-blue-900/20 border border-blue-800/50 rounded-lg p-3 text-sm text-blue-300">
                 <div className="flex items-start gap-2">
-                  <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <svg
+                    className="w-5 h-5 flex-shrink-0 mt-0.5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
                   </svg>
                   <p>
-                    <strong>Dica:</strong> Ajuste os valores dos sensores e clique em analisar para obter recomendações personalizadas de irrigação.
+                    <strong>Dica:</strong> Ajuste os valores dos sensores e
+                    clique em analisar para obter recomendações personalizadas
+                    de irrigação.
                   </p>
                 </div>
               </div>
@@ -673,7 +766,9 @@ export default function Home() {
                           style={{
                             height: `${Math.min(
                               100,
-                              (recommendation.VolumeL /
+                              ((typeof recommendation.VolumeL === "number"
+                                ? recommendation.VolumeL
+                                : 0) /
                                 (isPot ? parseFloat(potSize) : 10)) *
                                 100
                             )}%`,
@@ -769,7 +864,8 @@ export default function Home() {
                       Pronto para analisar
                     </p>
                     <p className="text-sm text-slate-600">
-                      Configure os sensores e clique em &quot;Analisar e Recomendar&quot;
+                      Configure os sensores e clique em &quot;Analisar e
+                      Recomendar&quot;
                     </p>
                   </div>
                 </div>
@@ -828,7 +924,9 @@ export default function Home() {
                           style={{
                             height: `${Math.min(
                               100,
-                              (aiRecommendation.volumeL /
+                              ((typeof aiRecommendation.volumeL === "number"
+                                ? aiRecommendation.volumeL
+                                : 0) /
                                 (isPot ? parseFloat(potSize) : 10)) *
                                 100
                             )}%`,
