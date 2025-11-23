@@ -13,6 +13,7 @@ export default function LoginPage() {
   const [name, setName] = useState('');
   const [isRegister, setIsRegister] = useState(false);
   const [error, setError] = useState('');
+  const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [validationErrors, setValidationErrors] = useState<{email?: string; password?: string; name?: string}>({});
@@ -90,11 +91,12 @@ export default function LoginPage() {
       const data = await res.json();
       
       if (isRegister) {
-        // Heurística 1: Visibility of System Status - Feedback de sucesso
+        // Show success notification
         setIsRegister(false);
         setError('');
         setPassword('');
-        alert('✅ Registro realizado com sucesso! Faça login para continuar.');
+        setStatus('Registro realizado com sucesso! Faça login para continuar.');
+        setTimeout(() => setStatus(''), 5000);
       } else {
         login(data.access_token, data.user);
       }
@@ -259,6 +261,16 @@ export default function LoginPage() {
                     <p className="font-medium">Erro ao autenticar</p>
                     <p className="text-red-400">{error}</p>
                   </div>
+                </div>
+              </div>
+            )}
+
+            {/* Success notification */}
+            {status && (
+              <div className="bg-green-900/20 border border-green-800/50 rounded-lg p-3 text-sm text-green-300 animate-in fade-in slide-in-from-top-2">
+                <div className="flex items-start gap-2">
+                  <span className="text-lg">✅</span>
+                  <p className="font-medium">{status}</p>
                 </div>
               </div>
             )}

@@ -41,9 +41,11 @@ export default function AdminPage() {
       if (res.ok) {
         const data = await res.json();
         setModules(data.modules);
+      } else {
+        setStatus('❌ Falha ao carregar lista de módulos');
       }
     } catch (err) {
-      console.error('Error loading modules:', err);
+      setStatus('❌ Erro ao conectar com o servidor');
     }
   };
 
@@ -83,7 +85,7 @@ export default function AdminPage() {
 
       const data = await res.json();
       if (res.ok) {
-        setStatus('✅ Módulo atualizado e validado com sucesso!');
+        setStatus('Módulo atualizado e validado com sucesso!');
         setTimeout(() => setStatus(''), 3000);
       } else {
         setStatus(`❌ Erro: ${data.message || 'Validação falhou'}`);
@@ -215,7 +217,7 @@ export default function AdminPage() {
                 )}
               </div>
               <Button 
-                className="bg-blue-600 hover:bg-blue-500 disabled:bg-slate-700 disabled:cursor-not-allowed text-white font-semibold px-8 py-6 shadow-lg shadow-blue-900/20 transition-all active:scale-[0.98] disabled:active:scale-100" 
+                className="cursor-pointer bg-blue-600 hover:bg-blue-500 disabled:bg-slate-700 disabled:cursor-not-allowed text-white font-semibold px-8 py-6 shadow-lg shadow-blue-900/20 transition-all active:scale-[0.98] disabled:active:scale-100" 
                 onClick={handleSave}
                 disabled={loading}
               >
@@ -225,7 +227,7 @@ export default function AdminPage() {
                     <span>Salvando...</span>
                   </div>
                 ) : (
-                  <span>💾 Salvar e Validar</span>
+                  <span>Salvar e Validar</span>
                 )}
               </Button>
             </div>
