@@ -293,14 +293,6 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Heurística 6: Help and Documentation - Credenciais de teste */}
-        <div className="mt-6 bg-slate-900/50 border border-slate-800 rounded-lg p-4 text-sm">
-          <p className="text-slate-400 mb-2">💡 <strong>Credenciais de teste:</strong></p>
-          <div className="space-y-1 text-slate-500 font-mono text-xs">
-            <p>Admin: admin@irrigacao.com / Admin123!</p>
-            <p>User: testuser@example.com / SecurePass123</p>
-          </div>
-        </div>
       </div>
     </div>
   );
