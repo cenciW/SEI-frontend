@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -27,6 +29,8 @@ import {
 } from "@/components/IrrigationUI";
 import { useIrrigationSystem } from "@/hooks/useIrrigationSystem";
 import { CropType, StageType, SystemType, GoalType } from "@/lib/types";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
   const {
@@ -69,6 +73,33 @@ export default function Home() {
     // Actions
     handleAnalyze,
   } = useIrrigationSystem();
+  
+  const { user, logout, isLoading } = useAuth();
+  const router = useRouter();
+
+  // Route protection - redirect to login if not authenticated
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.push('/login');
+    }
+  }, [user, isLoading, router]);
+
+  // Show loading state while checking authentication
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-50 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="w-16 h-16 border-4 border-slate-700 border-t-blue-500 rounded-full animate-spin mx-auto"></div>
+          <p className="text-slate-400">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render if not authenticated
+  if (!user) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-50 p-8 font-sans transition-colors duration-300">
@@ -86,11 +117,33 @@ export default function Home() {
           onClose={() => setError(null)}
         />
 
-        <div className="text-center space-y-2">
-          <h1 className="text-4xl font-bold bg-linear-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
-            Sistema Especialista de Irrigação
-          </h1>
-          <p className="text-slate-400">Comparação: Prolog vs IA Generativa</p>
+        <div className="flex justify-between items-center">
+          <div className="text-center space-y-2 flex-1">
+            <h1 className="text-4xl font-bold bg-linear-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
+              Sistema Especialista de Irrigação
+            </h1>
+            <p className="text-slate-400">Comparação: Prolog vs IA Generativa</p>
+          </div>
+          <div className="flex items-center gap-4">
+            {user ? (
+              <div className="flex items-center gap-4">
+                <div className="text-right">
+                  <p className="text-sm font-medium text-slate-200">{user.name}</p>
+                  <p className="text-xs text-slate-400">{user.role}</p>
+                </div>
+                {user.role === 'ADMIN' && (
+                  <Button variant="destructive" className="cursor-pointer hover:bg-slate-800" onClick={() => router.push('/admin')}>
+                    Prolog Admin
+                  </Button>
+                )}
+                <Button variant="default" className="cursor-pointer hover:bg-slate-800" onClick={logout}>
+                  Logout
+                </Button>
+              </div>
+            ) : (
+              <Button onClick={() => router.push('/login')}>Login</Button>
+            )}
+          </div>
         </div>
 
         <div className="grid md:grid-cols-3 gap-6">
@@ -641,7 +694,15 @@ export default function Home() {
                       d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
                     />
                   </svg>
-                  <p className="text-lg font-medium">Aguardando análise...</p>
+                  <div className="text-center space-y-2">
+                    <p className="text-lg font-medium text-slate-400">
+                      Consultar IA
+                    </p>
+                    <p className="text-sm text-slate-600">
+                      Clique em &quot;Analisar e Recomendar&quot; para obter
+                      uma recomendação da IA
+                    </p>
+                  </div>
                 </div>
               )}
             </CardContent>
