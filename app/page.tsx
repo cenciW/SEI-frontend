@@ -102,8 +102,8 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-50 p-8 font-sans transition-colors duration-300">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <div className="min-h-screen bg-slate-950 text-slate-50 p-4 sm:p-6 lg:p-8 font-sans transition-colors duration-300">
+      <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6 lg:space-y-8">
         {/* Heurística 1: Visibilidade do status do sistema */}
         <ApiStatusIndicator apiStatus={apiStatus} />
 
@@ -117,36 +117,38 @@ export default function Home() {
           onClose={() => setError(null)}
         />
 
-        <div className="flex justify-between items-center">
-          <div className="text-center space-y-2 flex-1">
-            <h1 className="text-4xl font-bold bg-linear-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
+        <div className="flex flex-col lg:flex-row justify-between items-center gap-4">
+          <div className="text-center lg:flex-1 space-y-2">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-linear-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
               Sistema Especialista de Irrigação
             </h1>
-            <p className="text-slate-400">Comparação: Prolog vs IA Generativa</p>
+            <p className="text-slate-400 text-sm sm:text-base">Comparação: Prolog vs IA Generativa</p>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
             {user ? (
-              <div className="flex items-center gap-4">
-                <div className="text-right">
+              <>
+                <div className="text-center sm:text-right">
                   <p className="text-sm font-medium text-slate-200">{user.name}</p>
                   <p className="text-xs text-slate-400">{user.role}</p>
                 </div>
-                {user.role === 'ADMIN' && (
-                  <Button variant="destructive" className="cursor-pointer hover:bg-slate-800" onClick={() => router.push('/admin')}>
-                    Prolog Admin
+                <div className="flex gap-2 w-full sm:w-auto">
+                  {user.role === 'ADMIN' && (
+                    <Button variant="destructive" className="cursor-pointer hover:bg-slate-800 flex-1 sm:flex-none" onClick={() => router.push('/admin')}>
+                      Admin
+                    </Button>
+                  )}
+                  <Button variant="default" className="cursor-pointer hover:bg-slate-800 flex-1 sm:flex-none" onClick={logout}>
+                    Logout
                   </Button>
-                )}
-                <Button variant="default" className="cursor-pointer hover:bg-slate-800" onClick={logout}>
-                  Logout
-                </Button>
-              </div>
+                </div>
+              </>
             ) : (
               <Button onClick={() => router.push('/login')}>Login</Button>
             )}
           </div>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* SENSOR CARD */}
           <Card className="bg-slate-900 border-slate-800 shadow-xl">
             <CardHeader>
@@ -159,10 +161,10 @@ export default function Home() {
             </CardHeader>
             <CardContent className="space-y-6">
               {/* VISUALIZATION: POT MOISTURE & CROP */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-slate-300">Umidade do Solo</Label>
-                  <div className="h-56 relative bg-slate-900 rounded-lg border border-slate-800 overflow-hidden flex items-end justify-center">
+                  <Label className="text-slate-300 text-sm sm:text-base">Umidade do Solo</Label>
+                  <div className="h-40 sm:h-56 relative bg-slate-900 rounded-lg border border-slate-800 overflow-hidden flex items-end justify-center">
                     <div
                       className="w-full bg-blue-500/60 transition-all duration-1000 ease-out relative"
                       style={{ height: `${moisture}%` }}
@@ -171,7 +173,7 @@ export default function Home() {
                       <div className="absolute w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20" />
                     </div>
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-2xl font-bold text-white drop-shadow-md">
+                      <span className="text-xl sm:text-2xl font-bold text-white drop-shadow-md">
                         {moisture}%
                       </span>
                     </div>
@@ -179,10 +181,10 @@ export default function Home() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-slate-300">
+                  <Label className="text-slate-300 text-sm sm:text-base">
                     Visualização da Cultura
                   </Label>
-                  <div className="h-56">
+                  <div className="h-40 sm:h-56">
                     <CropVisualization
                       crop={crop}
                       mode={isPot ? "pot" : "field"}
@@ -191,11 +193,11 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   {/* Heurística 10: Ajuda e documentação */}
                   <div className="flex items-center gap-2">
-                    <Label className="text-slate-300">Localização</Label>
+                    <Label className="text-slate-300 text-sm sm:text-base">Localização</Label>
                     <div className="group relative">
                       <svg
                         className="w-4 h-4 text-slate-500 cursor-help"
@@ -224,7 +226,7 @@ export default function Home() {
                 </div>
                 <div className="space-y-2 relative z-10">
                   <div className="flex items-center gap-2">
-                    <Label className="text-slate-300">Cultura</Label>
+                    <Label className="text-slate-300 text-sm sm:text-base">Cultura</Label>
                     <div className="group relative">
                       <svg
                         className="w-4 h-4 text-slate-500 cursor-help"
@@ -263,7 +265,7 @@ export default function Home() {
               </div>
 
               <div className="space-y-2">
-                <Label className="text-slate-300">Modo de Plantio</Label>
+                <Label className="text-slate-300 text-sm sm:text-base">Modo de Plantio</Label>
                 <div className="flex items-center gap-2 border border-slate-800 bg-slate-950 p-3 rounded-md">
                   <input
                     type="checkbox"
@@ -283,7 +285,7 @@ export default function Home() {
 
               {isPot && (
                 <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
-                  <Label className="text-slate-300">
+                  <Label className="text-slate-300 text-sm sm:text-base">
                     Tamanho do Vaso (Litros)
                   </Label>
                   <Input
@@ -296,9 +298,9 @@ export default function Home() {
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-slate-300">Estágio</Label>
+                  <Label className="text-slate-300 text-sm sm:text-base">Estágio</Label>
                   <Select
                     value={stage}
                     onValueChange={(value) => setStage(value as StageType)}
@@ -314,7 +316,7 @@ export default function Home() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-slate-300">
+                  <Label className="text-slate-300 text-sm sm:text-base">
                     Semana (
                     {stage === "vegetative"
                       ? "V"
@@ -336,7 +338,7 @@ export default function Home() {
               {/* ADVANCED PARAMS BASED ON CROP */}
               {crop === "cannabis" && (
                 <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
-                  <Label className="text-slate-300">
+                  <Label className="text-slate-300 text-sm sm:text-base">
                     EC (Condutividade Elétrica) atual do solo
                   </Label>
                   <Input
@@ -350,9 +352,9 @@ export default function Home() {
               )}
 
               {crop === "tomato" && (
-                <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2">
                   <div className="space-y-2">
-                    <Label className="text-slate-300">
+                    <Label className="text-slate-300 text-sm sm:text-base">
                       Meta de Crescimento
                     </Label>
                     <Select
@@ -370,7 +372,7 @@ export default function Home() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-slate-300">EC</Label>
+                    <Label className="text-slate-300 text-sm sm:text-base">EC</Label>
                     <Input
                       type="number"
                       className="bg-slate-950 border-slate-800 text-slate-200"
@@ -384,7 +386,7 @@ export default function Home() {
 
               {(crop === "corn" || crop === "wheat") && (
                 <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
-                  <Label className="text-slate-300">Sistema Especialista de Irrigação</Label>
+                  <Label className="text-slate-300 text-sm sm:text-base">Sistema Especialista de Irrigação</Label>
                   <Select
                     value={system}
                     onValueChange={(value) => setSystem(value as SystemType)}
@@ -402,7 +404,7 @@ export default function Home() {
               )}
 
               <div className="space-y-2">
-                <Label className="text-slate-300">Umidade do Solo (%)</Label>
+                <Label className="text-slate-300 text-sm sm:text-base">Umidade do Solo (%)</Label>
                 <div className="flex items-center gap-4">
                   <Input
                     type="range"
@@ -424,7 +426,7 @@ export default function Home() {
               </div>
 
               <div className="space-y-2">
-                <Label className="text-slate-300">
+                <Label className="text-slate-300 text-sm sm:text-base">
                   Chuva nas últimas 24h (mm)
                 </Label>
                 <Input
@@ -436,9 +438,9 @@ export default function Home() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-slate-300">Temp. Ar (°C)</Label>
+                  <Label className="text-slate-300 text-sm sm:text-base">Temp. Ar (°C)</Label>
                   <Input
                     type="number"
                     className="bg-slate-950 border-slate-800 text-slate-200"
@@ -447,7 +449,7 @@ export default function Home() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-slate-300">Umidade Ar (%)</Label>
+                  <Label className="text-slate-300 text-sm sm:text-base">Umidade Ar (%)</Label>
                   <Input
                     type="number"
                     className="bg-slate-950 border-slate-800 text-slate-200"
@@ -461,7 +463,7 @@ export default function Home() {
 
               {/* Heurística 1: Feedback visual durante ação */}
               <Button
-                className="cursor-pointer w-full bg-blue-600 hover:bg-blue-500 disabled:bg-slate-700 disabled:cursor-not-allowed text-white font-semibold py-6 text-lg shadow-lg shadow-blue-900/20 transition-all active:scale-[0.98] disabled:active:scale-100"
+                className="cursor-pointer w-full bg-blue-600 hover:bg-blue-500 disabled:bg-slate-700 disabled:cursor-not-allowed text-white font-semibold py-5 sm:py-6 text-base sm:text-lg shadow-lg shadow-blue-900/20 transition-all active:scale-[0.98] disabled:active:scale-100"
                 onClick={handleAnalyze}
                 disabled={loading || aiLoading}
               >
@@ -478,10 +480,10 @@ export default function Home() {
               </Button>
 
               {/* Heurística 10: Ajuda contextual */}
-              <div className="bg-blue-900/20 border border-blue-800/50 rounded-lg p-3 text-sm text-blue-300">
+              <div className="bg-blue-900/20 border border-blue-800/50 rounded-lg p-3 text-xs sm:text-sm text-blue-300">
                 <div className="flex items-start gap-2">
                   <svg
-                    className="w-5 h-5 shrink-0 mt-0.5"
+                    className="w-4 h-4 sm:w-5 sm:h-5 shrink-0 mt-0.5"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -545,8 +547,8 @@ export default function Home() {
                   </div>
 
                   <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <Label className="text-slate-300">
+                    <div className="flex justify-between text-xs sm:text-sm">
+                      <Label className="text-slate-300 text-xs sm:text-sm">
                         Pontuação de Irrigação
                       </Label>
                       <span className="text-slate-400 font-mono">
@@ -567,8 +569,8 @@ export default function Home() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-slate-300">Volume Sugerido</Label>
-                    <div className="text-3xl font-mono bg-slate-950 border border-slate-800 p-4 rounded-lg text-cyan-400 text-center shadow-inner">
+                    <Label className="text-slate-300 text-sm sm:text-base">Volume Sugerido</Label>
+                    <div className="text-2xl sm:text-3xl font-mono bg-slate-950 border border-slate-800 p-3 sm:p-4 rounded-lg text-cyan-400 text-center shadow-inner">
                       <VolumeDisplay
                         volumeL={recommendation.VolumeL}
                         isPot={isPot}
@@ -584,13 +586,13 @@ export default function Home() {
                 </div>
               ) : loading ? (
                 <div className="h-full flex flex-col items-center justify-center text-slate-600 space-y-4">
-                  <div className="w-16 h-16 rounded-full border-4 border-slate-700 border-t-blue-500 animate-spin"></div>
-                  <p>Analisando dados...</p>
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full border-4 border-slate-700 border-t-blue-500 animate-spin"></div>
+                  <p className="text-sm sm:text-base">Analisando dados...</p>
                 </div>
               ) : (
-                <div className="h-full flex flex-col items-center justify-center text-slate-500 space-y-4 p-6">
+                <div className="h-full flex flex-col items-center justify-center text-slate-500 space-y-4 p-4 sm:p-6">
                   <svg
-                    className="w-20 h-20 text-slate-700"
+                    className="w-16 h-16 sm:w-20 sm:h-20 text-slate-700"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -603,10 +605,10 @@ export default function Home() {
                     />
                   </svg>
                   <div className="text-center space-y-2">
-                    <p className="text-lg font-medium text-slate-400">
+                    <p className="text-base sm:text-lg font-medium text-slate-400">
                       Pronto para analisar
                     </p>
-                    <p className="text-sm text-slate-600">
+                    <p className="text-xs sm:text-sm text-slate-600">
                       Configure os sensores e clique em &quot;Analisar e
                       Recomendar&quot;
                     </p>
@@ -634,13 +636,13 @@ export default function Home() {
             <CardContent className="flex-1 flex flex-col justify-between">
               {aiRecommendation ? (
                 <div className="space-y-8 animate-in fade-in zoom-in-95 duration-500">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <div className="space-y-1">
-                      <Label className="text-slate-400">
+                      <Label className="text-slate-400 text-xs sm:text-sm">
                         Irrigação Necessária?
                       </Label>
                       <div
-                        className={`text-4xl font-black tracking-tight ${
+                        className={`text-3xl sm:text-4xl font-black tracking-tight ${
                           aiRecommendation.shouldIrrigate === "SIM"
                             ? "text-red-500 drop-shadow-[0_0_10px_rgba(239,68,68,0.5)]"
                             : "text-green-500 drop-shadow-[0_0_10px_rgba(34,197,94,0.5)]"
@@ -659,8 +661,8 @@ export default function Home() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-slate-300">Volume Sugerido</Label>
-                    <div className="text-3xl font-mono bg-slate-950 border border-slate-800 p-4 rounded-lg text-purple-400 text-center shadow-inner">
+                    <Label className="text-slate-300 text-sm sm:text-base">Volume Sugerido</Label>
+                    <div className="text-2xl sm:text-3xl font-mono bg-slate-950 border border-slate-800 p-3 sm:p-4 rounded-lg text-purple-400 text-center shadow-inner">
                       <VolumeDisplay
                         volumeL={aiRecommendation.volumeL}
                         isPot={isPot}
@@ -680,9 +682,9 @@ export default function Home() {
                   <p>Consultando IA...</p>
                 </div>
               ) : (
-                <div className="h-full flex flex-col items-center justify-center text-slate-500 space-y-4">
+                <div className="h-full flex flex-col items-center justify-center text-slate-500 space-y-4 p-4 sm:p-6">
                   <svg
-                    className="w-20 h-20 text-slate-700"
+                    className="w-16 h-16 sm:w-20 sm:h-20 text-slate-700"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -695,10 +697,10 @@ export default function Home() {
                     />
                   </svg>
                   <div className="text-center space-y-2">
-                    <p className="text-lg font-medium text-slate-400">
+                    <p className="text-base sm:text-lg font-medium text-slate-400">
                       Consultar IA
                     </p>
-                    <p className="text-sm text-slate-600">
+                    <p className="text-xs sm:text-sm text-slate-600">
                       Clique em &quot;Analisar e Recomendar&quot; para obter
                       uma recomendação da IA
                     </p>

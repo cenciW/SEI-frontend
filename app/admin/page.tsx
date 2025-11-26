@@ -135,20 +135,20 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-50 p-8">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen bg-slate-950 text-slate-50 p-4 sm:p-6 lg:p-8">
+      <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
               Painel Administrativo
             </h1>
-            <p className="text-slate-400 mt-2">
+            <p className="text-slate-400 mt-2 text-sm sm:text-base">
               Gerenciamento da Base de Conhecimento Prolog
             </p>
           </div>
           <Button
-            className="cursor-pointer bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700"
+            className="cursor-pointer bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 w-full sm:w-auto"
             onClick={() => router.push("/")}
           >
             Voltar para o App
@@ -158,18 +158,18 @@ export default function AdminPage() {
         {/* Module Selector Card */}
         <Card className="bg-slate-900 border-slate-800 shadow-xl">
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-slate-100 text-xl">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <CardTitle className="text-slate-100 text-lg sm:text-xl">
                 Editor de Módulos Prolog
               </CardTitle>
-              <div className="flex items-center gap-3">
-                <span className="text-sm text-slate-400">Módulo:</span>
+              <div className="flex items-center gap-3 w-full sm:w-auto">
+                <span className="text-sm text-slate-400 hidden sm:inline">Módulo:</span>
                 <Select
                   value={selectedModule}
                   onValueChange={setSelectedModule}
                   disabled={loading}
                 >
-                  <SelectTrigger className="w-[320px] bg-slate-950 border-slate-800 text-slate-200 hover:border-blue-500 transition-colors">
+                  <SelectTrigger className="w-full sm:w-[280px] lg:w-[320px] bg-slate-950 border-slate-800 text-slate-200 hover:border-blue-500 transition-colors">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-900 border-slate-800 text-slate-200">
@@ -204,7 +204,7 @@ export default function AdminPage() {
             {/* Editor */}
             <div className="relative">
               <textarea
-                className="w-full h-[500px] p-4 font-mono text-sm bg-slate-950 text-green-400 rounded-lg border border-slate-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all resize-none"
+                className="w-full h-[300px] sm:h-[400px] lg:h-[500px] p-3 sm:p-4 font-mono text-xs sm:text-sm bg-slate-950 text-green-400 rounded-lg border border-slate-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all resize-none"
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 spellCheck={false}
@@ -222,11 +222,11 @@ export default function AdminPage() {
             </div>
 
             {/* Status and Save Button */}
-            <div className="flex justify-between items-center pt-2">
-              <div className="flex-1">
+            <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 pt-2">
+              <div className="flex-1 order-2 sm:order-1">
                 {status && (
                   <div
-                    className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg animate-in fade-in slide-in-from-left-2 ${
+                    className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg animate-in fade-in slide-in-from-left-2 text-sm ${
                       status.toLowerCase().includes("sucesso")
                         ? "bg-green-900/20 border border-green-800/50 text-green-400"
                         : status.toLowerCase().includes("erro")
@@ -239,7 +239,7 @@ export default function AdminPage() {
                 )}
               </div>
               <Button
-                className="cursor-pointer bg-blue-600 hover:bg-blue-500 disabled:bg-slate-700 disabled:cursor-not-allowed text-white font-semibold px-8 py-6 shadow-lg shadow-blue-900/20 transition-all active:scale-[0.98] disabled:active:scale-100"
+                className="cursor-pointer bg-blue-600 hover:bg-blue-500 disabled:bg-slate-700 disabled:cursor-not-allowed text-white font-semibold px-6 py-5 sm:px-8 sm:py-6 shadow-lg shadow-blue-900/20 transition-all active:scale-[0.98] disabled:active:scale-100 order-1 sm:order-2 w-full sm:w-auto"
                 onClick={handleSave}
                 disabled={loading}
               >
