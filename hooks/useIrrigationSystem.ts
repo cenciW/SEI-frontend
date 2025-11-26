@@ -147,7 +147,7 @@ export const useIrrigationSystem = () => {
       setApiStatus("online");
       showNotification(
         setSuccessMessage,
-        "✓ Análise concluída com sucesso!",
+        "Análise concluída com sucesso!",
         NOTIFICATION_TIMEOUTS.SUCCESS
       );
     } catch (error) {
