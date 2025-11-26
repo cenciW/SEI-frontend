@@ -163,7 +163,9 @@ export default function AdminPage() {
                 Editor de Módulos Prolog
               </CardTitle>
               <div className="flex items-center gap-3 w-full sm:w-auto">
-                <span className="text-sm text-slate-400 hidden sm:inline">Módulo:</span>
+                <span className="text-sm text-slate-400 hidden sm:inline">
+                  Módulo:
+                </span>
                 <Select
                   value={selectedModule}
                   onValueChange={setSelectedModule}

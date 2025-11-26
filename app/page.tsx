@@ -73,14 +73,14 @@ export default function Home() {
     // Actions
     handleAnalyze,
   } = useIrrigationSystem();
-  
+
   const { user, logout, isLoading } = useAuth();
   const router = useRouter();
 
   // Route protection - redirect to login if not authenticated
   useEffect(() => {
     if (!isLoading && !user) {
-      router.push('/login');
+      router.push("/login");
     }
   }, [user, isLoading, router]);
 
@@ -122,28 +122,40 @@ export default function Home() {
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-linear-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
               Sistema Especialista de Irrigação
             </h1>
-            <p className="text-slate-400 text-sm sm:text-base">Comparação: Prolog vs IA Generativa</p>
+            <p className="text-slate-400 text-sm sm:text-base">
+              Comparação: Prolog vs IA Generativa
+            </p>
           </div>
           <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
             {user ? (
               <>
                 <div className="text-center sm:text-right">
-                  <p className="text-sm font-medium text-slate-200">{user.name}</p>
+                  <p className="text-sm font-medium text-slate-200">
+                    {user.name}
+                  </p>
                   <p className="text-xs text-slate-400">{user.role}</p>
                 </div>
                 <div className="flex gap-2 w-full sm:w-auto">
-                  {user.role === 'ADMIN' && (
-                    <Button variant="destructive" className="cursor-pointer hover:bg-slate-800 flex-1 sm:flex-none" onClick={() => router.push('/admin')}>
+                  {user.role === "ADMIN" && (
+                    <Button
+                      variant="destructive"
+                      className="cursor-pointer hover:bg-slate-800 flex-1 sm:flex-none"
+                      onClick={() => router.push("/admin")}
+                    >
                       Admin
                     </Button>
                   )}
-                  <Button variant="default" className="cursor-pointer hover:bg-slate-800 flex-1 sm:flex-none" onClick={logout}>
+                  <Button
+                    variant="default"
+                    className="cursor-pointer hover:bg-slate-800 flex-1 sm:flex-none"
+                    onClick={logout}
+                  >
                     Logout
                   </Button>
                 </div>
               </>
             ) : (
-              <Button onClick={() => router.push('/login')}>Login</Button>
+              <Button onClick={() => router.push("/login")}>Login</Button>
             )}
           </div>
         </div>
@@ -163,7 +175,9 @@ export default function Home() {
               {/* VISUALIZATION: POT MOISTURE & CROP */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-slate-300 text-sm sm:text-base">Umidade do Solo</Label>
+                  <Label className="text-slate-300 text-sm sm:text-base">
+                    Umidade do Solo
+                  </Label>
                   <div className="h-40 sm:h-56 relative bg-slate-900 rounded-lg border border-slate-800 overflow-hidden flex items-end justify-center">
                     <div
                       className="w-full bg-blue-500/60 transition-all duration-1000 ease-out relative"
@@ -197,7 +211,9 @@ export default function Home() {
                 <div className="space-y-2">
                   {/* Heurística 10: Ajuda e documentação */}
                   <div className="flex items-center gap-2">
-                    <Label className="text-slate-300 text-sm sm:text-base">Localização</Label>
+                    <Label className="text-slate-300 text-sm sm:text-base">
+                      Localização
+                    </Label>
                     <div className="group relative">
                       <svg
                         className="w-4 h-4 text-slate-500 cursor-help"
@@ -226,7 +242,9 @@ export default function Home() {
                 </div>
                 <div className="space-y-2 relative z-10">
                   <div className="flex items-center gap-2">
-                    <Label className="text-slate-300 text-sm sm:text-base">Cultura</Label>
+                    <Label className="text-slate-300 text-sm sm:text-base">
+                      Cultura
+                    </Label>
                     <div className="group relative">
                       <svg
                         className="w-4 h-4 text-slate-500 cursor-help"
@@ -265,7 +283,9 @@ export default function Home() {
               </div>
 
               <div className="space-y-2">
-                <Label className="text-slate-300 text-sm sm:text-base">Modo de Plantio</Label>
+                <Label className="text-slate-300 text-sm sm:text-base">
+                  Modo de Plantio
+                </Label>
                 <div className="flex items-center gap-2 border border-slate-800 bg-slate-950 p-3 rounded-md">
                   <input
                     type="checkbox"
@@ -300,7 +320,9 @@ export default function Home() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-slate-300 text-sm sm:text-base">Estágio</Label>
+                  <Label className="text-slate-300 text-sm sm:text-base">
+                    Estágio
+                  </Label>
                   <Select
                     value={stage}
                     onValueChange={(value) => setStage(value as StageType)}
@@ -372,7 +394,9 @@ export default function Home() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-slate-300 text-sm sm:text-base">EC</Label>
+                    <Label className="text-slate-300 text-sm sm:text-base">
+                      EC
+                    </Label>
                     <Input
                       type="number"
                       className="bg-slate-950 border-slate-800 text-slate-200"
@@ -386,7 +410,9 @@ export default function Home() {
 
               {(crop === "corn" || crop === "wheat") && (
                 <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
-                  <Label className="text-slate-300 text-sm sm:text-base">Sistema Especialista de Irrigação</Label>
+                  <Label className="text-slate-300 text-sm sm:text-base">
+                    Sistema Especialista de Irrigação
+                  </Label>
                   <Select
                     value={system}
                     onValueChange={(value) => setSystem(value as SystemType)}
@@ -404,7 +430,9 @@ export default function Home() {
               )}
 
               <div className="space-y-2">
-                <Label className="text-slate-300 text-sm sm:text-base">Umidade do Solo (%)</Label>
+                <Label className="text-slate-300 text-sm sm:text-base">
+                  Umidade do Solo (%)
+                </Label>
                 <div className="flex items-center gap-4">
                   <Input
                     type="range"
@@ -440,7 +468,9 @@ export default function Home() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-slate-300 text-sm sm:text-base">Temp. Ar (°C)</Label>
+                  <Label className="text-slate-300 text-sm sm:text-base">
+                    Temp. Ar (°C)
+                  </Label>
                   <Input
                     type="number"
                     className="bg-slate-950 border-slate-800 text-slate-200"
@@ -449,7 +479,9 @@ export default function Home() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-slate-300 text-sm sm:text-base">Umidade Ar (%)</Label>
+                  <Label className="text-slate-300 text-sm sm:text-base">
+                    Umidade Ar (%)
+                  </Label>
                   <Input
                     type="number"
                     className="bg-slate-950 border-slate-800 text-slate-200"
@@ -569,7 +601,9 @@ export default function Home() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-slate-300 text-sm sm:text-base">Volume Sugerido</Label>
+                    <Label className="text-slate-300 text-sm sm:text-base">
+                      Volume Sugerido
+                    </Label>
                     <div className="text-2xl sm:text-3xl font-mono bg-slate-950 border border-slate-800 p-3 sm:p-4 rounded-lg text-cyan-400 text-center shadow-inner">
                       <VolumeDisplay
                         volumeL={recommendation.VolumeL}
@@ -661,7 +695,9 @@ export default function Home() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-slate-300 text-sm sm:text-base">Volume Sugerido</Label>
+                    <Label className="text-slate-300 text-sm sm:text-base">
+                      Volume Sugerido
+                    </Label>
                     <div className="text-2xl sm:text-3xl font-mono bg-slate-950 border border-slate-800 p-3 sm:p-4 rounded-lg text-purple-400 text-center shadow-inner">
                       <VolumeDisplay
                         volumeL={aiRecommendation.volumeL}
@@ -701,8 +737,8 @@ export default function Home() {
                       Consultar IA
                     </p>
                     <p className="text-xs sm:text-sm text-slate-600">
-                      Clique em &quot;Analisar e Recomendar&quot; para obter
-                      uma recomendação da IA
+                      Clique em &quot;Analisar e Recomendar&quot; para obter uma
+                      recomendação da IA
                     </p>
                   </div>
                 </div>
