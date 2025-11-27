@@ -140,10 +140,10 @@ export default function AdminPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
               Painel Administrativo
             </h1>
-            <p className="text-slate-400 mt-2 text-sm sm:text-base">
+            <p className="text-slate-400 mt-2 text-base sm:text-lg">
               Gerenciamento da Base de Conhecimento Prolog
             </p>
           </div>
@@ -159,7 +159,7 @@ export default function AdminPage() {
         <Card className="bg-slate-900 border-slate-800 shadow-xl">
           <CardHeader>
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <CardTitle className="text-slate-100 text-lg sm:text-xl">
+              <CardTitle className="text-slate-100 text-xl sm:text-2xl">
                 Editor de Módulos Prolog
               </CardTitle>
               <div className="flex items-center gap-3 w-full sm:w-auto">

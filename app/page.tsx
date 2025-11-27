@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -76,6 +76,22 @@ export default function Home() {
 
   const { user, logout, isLoading } = useAuth();
   const router = useRouter();
+  const [showAdminModal, setShowAdminModal] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+
+  const handleAdminClick = () => {
+    setShowAdminModal(true);
+    setTimeout(() => {
+      router.push("/admin");
+    }, 1500);
+  };
+
+  const handleLogoutClick = () => {
+    setShowLogoutModal(true);
+    setTimeout(() => {
+      logout();
+    }, 1500);
+  };
 
   // Route protection - redirect to login if not authenticated
   useEffect(() => {
@@ -103,6 +119,116 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-50 p-4 sm:p-6 lg:p-8 font-sans transition-colors duration-300">
+      {/* Admin Modal */}
+      {showAdminModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="bg-slate-900 border border-blue-500/50 rounded-2xl p-8 shadow-2xl shadow-blue-500/20 animate-in zoom-in-95 slide-in-from-bottom-4 duration-500 max-w-sm mx-4">
+            <div className="flex flex-col items-center text-center space-y-4">
+              {/* Key Icon with rotation animation */}
+              <div className="w-20 h-20 bg-blue-500/20 rounded-full flex items-center justify-center animate-in zoom-in duration-700">
+                <svg
+                  className="w-12 h-12 text-blue-400 animate-[wiggle_1s_ease-in-out_infinite]"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  style={{
+                    animation: "wiggle 1s ease-in-out infinite",
+                  }}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"
+                  />
+                </svg>
+              </div>
+
+              {/* Admin Message */}
+              <div className="space-y-2">
+                <h3 className="text-2xl font-bold text-blue-400">
+                  Acesso Administrativo
+                </h3>
+                <p className="text-slate-400">
+                  Indo para configurações de administrador...
+                </p>
+              </div>
+
+              {/* Loading indicator */}
+              <div className="flex gap-2 mt-4">
+                <div
+                  className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"
+                  style={{ animationDelay: "0ms" }}
+                ></div>
+                <div
+                  className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"
+                  style={{ animationDelay: "150ms" }}
+                ></div>
+                <div
+                  className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"
+                  style={{ animationDelay: "300ms" }}
+                ></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Logout Modal */}
+      {showLogoutModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="bg-slate-900 border border-red-500/50 rounded-2xl p-8 shadow-2xl shadow-red-500/20 animate-in zoom-in-95 slide-in-from-bottom-4 duration-500 max-w-sm mx-4">
+            <div className="flex flex-col items-center text-center space-y-4">
+              {/* Logout Icon with wave animation */}
+              <div className="w-20 h-20 bg-red-500/20 rounded-full flex items-center justify-center animate-in zoom-in duration-700">
+                <svg
+                  className="w-12 h-12 text-red-400 animate-[wave_1s_ease-in-out_infinite]"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  style={{
+                    animation: "wave 1s ease-in-out infinite",
+                  }}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                  />
+                </svg>
+              </div>
+
+              {/* Logout Message */}
+              <div className="space-y-2">
+                <h3 className="text-2xl font-bold text-red-400">
+                  Saindo do Sistema
+                </h3>
+                <p className="text-slate-400">
+                  Até logo! Encerrando sua sessão...
+                </p>
+              </div>
+
+              {/* Loading indicator */}
+              <div className="flex gap-2 mt-4">
+                <div
+                  className="w-2 h-2 bg-red-400 rounded-full animate-bounce"
+                  style={{ animationDelay: "0ms" }}
+                ></div>
+                <div
+                  className="w-2 h-2 bg-red-400 rounded-full animate-bounce"
+                  style={{ animationDelay: "150ms" }}
+                ></div>
+                <div
+                  className="w-2 h-2 bg-red-400 rounded-full animate-bounce"
+                  style={{ animationDelay: "300ms" }}
+                ></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6 lg:space-y-8">
         {/* Heurística 1: Visibilidade do status do sistema */}
         <ApiStatusIndicator apiStatus={apiStatus} />
@@ -140,7 +266,7 @@ export default function Home() {
                     <Button
                       variant="destructive"
                       className="cursor-pointer hover:bg-slate-800 flex-1 sm:flex-none"
-                      onClick={() => router.push("/admin")}
+                      onClick={handleAdminClick}
                     >
                       Admin
                     </Button>
@@ -148,7 +274,7 @@ export default function Home() {
                   <Button
                     variant="default"
                     className="cursor-pointer hover:bg-slate-800 flex-1 sm:flex-none"
-                    onClick={logout}
+                    onClick={handleLogoutClick}
                   >
                     Logout
                   </Button>
@@ -164,10 +290,10 @@ export default function Home() {
           {/* SENSOR CARD */}
           <Card className="bg-slate-900 border-slate-800 shadow-xl">
             <CardHeader>
-              <CardTitle className="text-slate-100">
+              <CardTitle className="text-slate-100 text-lg sm:text-xl">
                 Leituras do Sensor
               </CardTitle>
-              <CardDescription className="text-slate-400">
+              <CardDescription className="text-slate-400 text-base">
                 Simular dados do sensor para o campo
               </CardDescription>
             </CardHeader>
@@ -187,7 +313,7 @@ export default function Home() {
                       <div className="absolute w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20" />
                     </div>
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-xl sm:text-2xl font-bold text-white drop-shadow-md">
+                      <span className="text-2xl sm:text-3xl font-bold text-white drop-shadow-md">
                         {moisture}%
                       </span>
                     </div>
@@ -495,7 +621,7 @@ export default function Home() {
 
               {/* Heurística 1: Feedback visual durante ação */}
               <Button
-                className="cursor-pointer w-full bg-blue-600 hover:bg-blue-500 disabled:bg-slate-700 disabled:cursor-not-allowed text-white font-semibold py-5 sm:py-6 text-base sm:text-lg shadow-lg shadow-blue-900/20 transition-all active:scale-[0.98] disabled:active:scale-100"
+                className="cursor-pointer w-full bg-blue-600 hover:bg-blue-500 disabled:bg-slate-700 disabled:cursor-not-allowed text-white font-semibold py-5 sm:py-6 text-lg sm:text-xl shadow-lg shadow-blue-900/20 transition-all active:scale-[0.98] disabled:active:scale-100"
                 onClick={handleAnalyze}
                 disabled={loading || aiLoading}
               >
@@ -512,7 +638,7 @@ export default function Home() {
               </Button>
 
               {/* Heurística 10: Ajuda contextual */}
-              <div className="bg-blue-900/20 border border-blue-800/50 rounded-lg p-3 text-xs sm:text-sm text-blue-300">
+              <div className="bg-blue-900/20 border border-blue-800/50 rounded-lg p-3 text-sm sm:text-base text-blue-300">
                 <div className="flex items-start gap-2">
                   <svg
                     className="w-4 h-4 sm:w-5 sm:h-5 shrink-0 mt-0.5"
@@ -540,8 +666,10 @@ export default function Home() {
           {/* RECOMMENDATION CARD */}
           <Card className="bg-slate-900 border-slate-800 shadow-xl flex flex-col">
             <CardHeader>
-              <CardTitle className="text-slate-100">Recomendação</CardTitle>
-              <CardDescription className="text-slate-400">
+              <CardTitle className="text-slate-100 text-lg sm:text-xl">
+                Recomendação
+              </CardTitle>
+              <CardDescription className="text-slate-400 text-base">
                 Decisão do sistema especialista
               </CardDescription>
             </CardHeader>
@@ -604,7 +732,7 @@ export default function Home() {
                     <Label className="text-slate-300 text-sm sm:text-base">
                       Volume Sugerido
                     </Label>
-                    <div className="text-2xl sm:text-3xl font-mono bg-slate-950 border border-slate-800 p-3 sm:p-4 rounded-lg text-cyan-400 text-center shadow-inner">
+                    <div className="text-3xl sm:text-4xl font-mono bg-slate-950 border border-slate-800 p-3 sm:p-4 rounded-lg text-cyan-400 text-center shadow-inner">
                       <VolumeDisplay
                         volumeL={recommendation.VolumeL}
                         isPot={isPot}
@@ -655,7 +783,7 @@ export default function Home() {
           {/* AI RECOMMENDATION CARD */}
           <Card className="bg-slate-900 border-slate-800 shadow-xl flex flex-col">
             <CardHeader>
-              <CardTitle className="text-slate-100 flex items-center gap-2">
+              <CardTitle className="text-slate-100 text-lg sm:text-xl flex items-center gap-2">
                 Recomendação IA
                 {aiRecommendation?.cached && (
                   <span className="text-xs bg-green-900/30 text-green-400 px-2 py-1 rounded border border-green-700">
@@ -676,7 +804,7 @@ export default function Home() {
                         Irrigação Necessária?
                       </Label>
                       <div
-                        className={`text-3xl sm:text-4xl font-black tracking-tight ${
+                        className={`text-4xl sm:text-5xl font-black tracking-tight ${
                           aiRecommendation.shouldIrrigate === "SIM"
                             ? "text-red-500 drop-shadow-[0_0_10px_rgba(239,68,68,0.5)]"
                             : "text-green-500 drop-shadow-[0_0_10px_rgba(34,197,94,0.5)]"

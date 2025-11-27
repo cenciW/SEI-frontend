@@ -16,6 +16,8 @@ export default function LoginPage() {
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [validationErrors, setValidationErrors] = useState<{
     email?: string;
     password?: string;
@@ -111,21 +113,35 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (isRegister) {
-        // Show success notification
-        setIsRegister(false);
-        setError("");
-        setPassword("");
-        setStatus("Registro realizado com sucesso! Faça login para continuar.");
-        setTimeout(() => setStatus(""), 5000);
+        // Show register success modal
+        setShowRegisterModal(true);
+        setTimeout(() => {
+          setShowRegisterModal(false);
+          setIsRegister(false);
+          setError("");
+          setPassword("");
+          setName("");
+          setStatus(
+            "Registro realizado com sucesso! Faça login para continuar."
+          );
+          setTimeout(() => setStatus(""), 5000);
+        }, 1500);
       } else {
-        login(data.access_token, data.user);
+        // Show success modal before redirecting
+        setShowSuccessModal(true);
+        setTimeout(() => {
+          login(data.access_token, data.user);
+        }, 1500);
       }
-    } catch (err: any) {
-      // Heurística 9: Error Recognition and Recovery - Mensagens de erro claras
-      setError(
-        err.message ||
-          "Erro ao autenticar. Verifique suas credenciais e tente novamente."
-      );
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(
+          err.message ||
+            "Erro ao autenticar. Verifique suas credenciais e tente novamente."
+        );
+      } else {
+        setError("Erro inesperado ao autenticar.");
+      }
     } finally {
       setLoading(false);
     }
@@ -133,6 +149,110 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-50 flex items-center justify-center p-4 font-sans">
+      {/* Register Success Modal */}
+      {showRegisterModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="bg-slate-900 border border-purple-500/50 rounded-2xl p-8 shadow-2xl shadow-purple-500/20 animate-in zoom-in-95 slide-in-from-bottom-4 duration-500 max-w-sm mx-4">
+            <div className="flex flex-col items-center text-center space-y-4">
+              {/* Success Icon */}
+              <div className="w-20 h-20 bg-purple-500/20 rounded-full flex items-center justify-center animate-in zoom-in duration-700">
+                <svg
+                  className="w-12 h-12 text-purple-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
+                  />
+                </svg>
+              </div>
+
+              {/* Success Message */}
+              <div className="space-y-2">
+                <h3 className="text-2xl font-bold text-purple-400">
+                  Conta Criada!
+                </h3>
+                <p className="text-slate-400">
+                  Registro realizado com sucesso! Faça login para continuar.
+                </p>
+              </div>
+
+              {/* Loading indicator */}
+              <div className="flex gap-2 mt-4">
+                <div
+                  className="w-2 h-2 bg-purple-400 rounded-full animate-bounce"
+                  style={{ animationDelay: "0ms" }}
+                ></div>
+                <div
+                  className="w-2 h-2 bg-purple-400 rounded-full animate-bounce"
+                  style={{ animationDelay: "150ms" }}
+                ></div>
+                <div
+                  className="w-2 h-2 bg-purple-400 rounded-full animate-bounce"
+                  style={{ animationDelay: "300ms" }}
+                ></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Login Success Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="bg-slate-900 border border-green-500/50 rounded-2xl p-8 shadow-2xl shadow-green-500/20 animate-in zoom-in-95 slide-in-from-bottom-4 duration-500 max-w-sm mx-4">
+            <div className="flex flex-col items-center text-center space-y-4">
+              {/* Success Icon */}
+              <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center animate-in zoom-in duration-700">
+                <svg
+                  className="w-12 h-12 text-green-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+              </div>
+
+              {/* Success Message */}
+              <div className="space-y-2">
+                <h3 className="text-2xl font-bold text-green-400">
+                  Login realizado!
+                </h3>
+                <p className="text-slate-400">
+                  Bem-vindo de volta! Redirecionando...
+                </p>
+              </div>
+
+              {/* Loading indicator */}
+              <div className="flex gap-2 mt-4">
+                <div
+                  className="w-2 h-2 bg-green-400 rounded-full animate-bounce"
+                  style={{ animationDelay: "0ms" }}
+                ></div>
+                <div
+                  className="w-2 h-2 bg-green-400 rounded-full animate-bounce"
+                  style={{ animationDelay: "150ms" }}
+                ></div>
+                <div
+                  className="w-2 h-2 bg-green-400 rounded-full animate-bounce"
+                  style={{ animationDelay: "300ms" }}
+                ></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Background decoration */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
@@ -142,10 +262,10 @@ export default function LoginPage() {
       <div className="w-full max-w-md relative z-10">
         {/* Heurística 4: Consistency and Standards - Título matching o sistema principal */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent mb-2">
+          <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent mb-2">
             Sistema Especialista de Irrigação
           </h1>
-          <p className="text-slate-400">
+          <p className="text-slate-400 text-base sm:text-lg">
             {isRegister ? "Criar nova conta" : "Acesse sua conta"}
           </p>
         </div>
@@ -181,7 +301,7 @@ export default function LoginPage() {
             {/* Name field - only for register */}
             {isRegister && (
               <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
-                <Label htmlFor="name" className="text-slate-300">
+                <Label htmlFor="name" className="text-slate-300 text-base">
                   Nome
                 </Label>
                 <Input
@@ -205,7 +325,7 @@ export default function LoginPage() {
 
             {/* Email field */}
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-slate-300">
+              <Label htmlFor="email" className="text-slate-300 text-base">
                 Email
               </Label>
               <Input
@@ -228,7 +348,7 @@ export default function LoginPage() {
 
             {/* Password field */}
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-slate-300">
+              <Label htmlFor="password" className="text-slate-300 text-base">
                 Senha
               </Label>
               <div className="relative">
@@ -307,7 +427,7 @@ export default function LoginPage() {
             {/* Heurística 1: Visibility of System Status - Loading indicator */}
             <Button
               type="submit"
-              className="cursor-pointer w-full bg-blue-600 hover:bg-blue-500 disabled:bg-slate-700 disabled:cursor-not-allowed text-white font-semibold py-6 text-lg shadow-lg shadow-blue-900/20 transition-all active:scale-[0.98] disabled:active:scale-100"
+              className="cursor-pointer w-full bg-blue-600 hover:bg-blue-500 disabled:bg-slate-700 disabled:cursor-not-allowed text-white font-semibold py-6 text-xl shadow-lg shadow-blue-900/20 transition-all active:scale-[0.98] disabled:active:scale-100"
               disabled={loading}
             >
               {loading ? (

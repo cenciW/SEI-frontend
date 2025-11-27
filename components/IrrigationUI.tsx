@@ -153,11 +153,23 @@ export const VolumeVisualization = ({
 
         {/* Water Fill */}
         <div
-          className={`absolute bottom-0 left-0 right-0 bg-${color}-500/80 transition-all duration-1000 ease-out`}
-          style={{ height: `${height}%` }}
+          className="absolute bottom-0 left-0 right-0 transition-all duration-1000 ease-out"
+          style={{
+            height: `${height}%`,
+            backgroundColor:
+              color === "cyan"
+                ? "rgba(34, 211, 238, 0.8)"
+                : "rgba(168, 85, 247, 0.8)",
+          }}
         >
           <div
-            className={`absolute top-0 left-0 right-0 h-1 bg-${color}-300 opacity-50 animate-pulse`}
+            className="absolute top-0 left-0 right-0 h-1 opacity-50 animate-pulse"
+            style={{
+              backgroundColor:
+                color === "cyan"
+                  ? "rgba(103, 232, 249, 1)"
+                  : "rgba(192, 132, 252, 1)",
+            }}
           ></div>
         </div>
       </div>
